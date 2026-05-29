@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SketchForge — Product Feature Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #fdfcf7;
+    --paper-warm: #f5f0e1;
+    --accent: #b8860b;
+    --accent-deep: #8b6508;
+    --rule: #d4cdb8;
+    --muted: #6b6555;
+    --shadow: rgba(26,26,26,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Fraunces', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 60px 32px 120px;
+  }
+  .doc-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .doc-tag::before, .doc-tag::after {
+    content: '';
+    height: 1px;
+    background: var(--accent);
+    flex: 0 0 40px;
+  }
+  .doc-tag::after { flex: 1; }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(40px, 7vw, 68px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin-bottom: 24px;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .lede {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--muted);
+    max-width: 640px;
+    margin-bottom: 48px;
+    font-style: italic;
+  }
+  .meta-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 40px;
+    padding: 20px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 56px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+  .meta-bar div span {
+    display: block;
+    color: var(--ink);
+    font-size: 12px;
+    margin-top: 2px;
+    letter-spacing: 0.02em;
+  }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 32px;
+    letter-spacing: -0.015em;
+    margin-top: 72px;
+    margin-bottom: 20px;
+    position: relative;
+    padding-left: 0;
+  }
+  h2 .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 21px;
+    margin-top: 36px;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  p { margin-bottom: 16px; max-width: 720px; }
+  strong { font-weight: 600; color: var(--ink); }
+  em { font-style: italic; }
+
+  .pillar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin: 32px 0;
+  }
+  .pillar {
+    background: var(--paper);
+    padding: 28px 24px;
+  }
+  .pillar-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+  }
+  .pillar h4 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 18px;
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+  .pillar p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .feature-block {
+    margin: 28px 0;
+    padding: 28px 32px;
+    background: var(--paper-warm);
+    border-left: 3px solid var(--accent);
+    position: relative;
+  }
+  .feature-block .feature-id {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+  }
+  .feature-block h4 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 20px;
+    margin-bottom: 10px;
+    padding-right: 80px;
+  }
+  .feature-block .what {
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+  .feature-block .why {
+    font-size: 14px;
+    color: var(--muted);
+    font-style: italic;
+    border-top: 1px dashed var(--rule);
+    padding-top: 12px;
+    margin: 0;
+  }
+
+  .domain-tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .domain-card {
+    border: 1px solid var(--rule);
+    padding: 20px;
+    background: var(--paper);
+  }
+  .domain-card .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+  .domain-card h5 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+  .domain-card .examples {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .domain-card .examples strong { color: var(--ink); }
+
+  .audience-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 14px;
+  }
+  .audience-table th {
+    text-align: left;
+    padding: 12px 16px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    font-weight: 500;
+  }
+  .audience-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  .audience-table tr:last-child td { border-bottom: none; }
+  .audience-table td:first-child {
+    font-style: italic;
+    font-weight: 500;
+    width: 28%;
+  }
+
+  .principle {
+    margin: 20px 0;
+    padding: 20px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .principle-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 6px;
+  }
+  .principle-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 400;
+    font-style: italic;
+    margin-bottom: 8px;
+  }
+
+  .precision-box {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 36px 32px;
+    margin: 40px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .precision-box::before {
+    content: 'PRECISION';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 120px;
+    font-weight: 700;
+    color: rgba(184,134,11,0.08);
+    letter-spacing: -0.05em;
+  }
+  .precision-box h3 {
+    color: var(--paper);
+    margin-top: 0;
+    font-style: italic;
+  }
+  .precision-box p {
+    color: rgba(253,252,247,0.85);
+    position: relative;
+    font-size: 15px;
+  }
+  .precision-box .accent { color: var(--accent); font-weight: 500; }
+
+  .roadmap {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0;
+    margin: 32px 0;
+  }
+  .roadmap-stage {
+    padding: 24px 20px;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+  .roadmap-stage:last-child { border-right: none; }
+  .roadmap-stage .phase {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.25em;
+    margin-bottom: 8px;
+  }
+  .roadmap-stage h5 {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+  .roadmap-stage p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  ul.crafted {
+    list-style: none;
+    padding-left: 0;
+    margin: 16px 0;
+  }
+  ul.crafted li {
+    padding: 10px 0 10px 28px;
+    position: relative;
+    font-size: 15px;
+    border-bottom: 1px dotted var(--rule);
+  }
+  ul.crafted li:last-child { border-bottom: none; }
+  ul.crafted li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .footer {
+    margin-top: 100px;
+    padding-top: 32px;
+    border-top: 2px solid var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media print {
+    body { font-size: 11pt; }
+    .page { padding: 0; max-width: 100%; }
+    h2 { page-break-after: avoid; }
+    .feature-block, .pillar { page-break-inside: avoid; }
+  }
+  @media (max-width: 640px) {
+    .page { padding: 40px 20px 80px; }
+    h1 { font-size: 40px; }
+    h2 { font-size: 26px; margin-top: 56px; }
+    .feature-block { padding: 22px 20px; }
+    .feature-block .feature-id { position: static; display: block; margin-bottom: 8px; }
+    .feature-block h4 { padding-right: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="doc-tag">Document 01 · Product Overview</div>
+  <h1>SketchForge.<br/><em>Draw it. We build it.</em></h1>
+  <p class="lede">A mobile-first creative tool that turns hand sketches of physical objects — pipes, structures, assemblies, furniture — into accurate, photorealistic representations through conversational refinement.</p>
+
+  <div class="meta-bar">
+    <div>Status<span>Concept · Pre-MVP</span></div>
+    <div>Platform<span>iOS · Android (Flutter)</span></div>
+    <div>Primary Users<span>Designers · Engineers · Hobbyists</span></div>
+    <div>Domain<span>Construction · Mechanical · Furniture</span></div>
+  </div>
+
+  <h2><span class="num">§ 01</span>The premise</h2>
+  <p>The gap between an idea and a usable visual representation is currently filled by either expensive software (CAD), expensive talent (designers), or unreliable AI (text-to-image). SketchForge proposes a third path: the user draws what they already see in their head — rough, approximate, mobile — and the system collaborates with them to produce something accurate.</p>
+  <p>The product is not a magic black box. It is a <em>conversation</em> between a person who knows what they want and a system that knows how to render it correctly. The sketch is the starting prompt, not the final input.</p>
+
+  <h2><span class="num">§ 02</span>The four pillars</h2>
+  <div class="pillar-grid">
+    <div class="pillar">
+      <div class="pillar-num">PILLAR 01</div>
+      <h4>Sketch fidelity</h4>
+      <p>Every stroke, in order, with pressure and timing — captured as structured data, not just pixels. The drawing itself becomes a parse tree.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">PILLAR 02</div>
+      <h4>Semantic understanding</h4>
+      <p>Vision models interpret the sketch against a closed vocabulary of construction primitives — cylinders, pipes, plates, joints — rather than guessing freely.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">PILLAR 03</div>
+      <h4>Conversational refinement</h4>
+      <p>The system asks the right questions: material, dimensions, context, style. The user's answers shape the output until it matches their intent.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">PILLAR 04</div>
+      <h4>Verified rendering</h4>
+      <p>Outputs come from two paths: procedural 3D rendering for geometric exactness, or AI generation with structural locks for photoreal style.</p>
+    </div>
+  </div>
+
+  <h2><span class="num">§ 03</span>Feature inventory</h2>
+  <p>The following are the features that comprise the v1 product. Each is presented with what it is, and why it is — because features without intent become bloat.</p>
+
+  <div class="feature-block">
+    <div class="feature-id">F-001</div>
+    <h4>Precision sketch canvas</h4>
+    <p class="what">A drawing surface that captures every stroke as vector data — coordinates, timing, pressure where available, and stroke order. Users draw with finger or stylus on a subtle grid background that suggests scale without imposing it.</p>
+    <p class="why">A bitmap loses the user's reasoning. A vector record preserves it. When the user draws the outer cylinder first and then the inserted pipe, that order is signal — it tells the interpreter what is structure and what is detail.</p>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-id">F-002</div>
+    <h4>Domain selection</h4>
+    <p class="what">Before drawing, the user selects a domain — <strong>mechanical</strong>, <strong>plumbing</strong>, <strong>structural</strong>, or <strong>furniture</strong>. This biases the interpretation engine toward sensible readings within that context.</p>
+    <p class="why">The same sketch of a vertical cylinder with a horizontal line through it means different things in different contexts: a pump in mechanical, a tee fitting in plumbing, a column with a beam in structural, a table leg with a stretcher in furniture. Domain context collapses ambiguity before it costs the user time.</p>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-id">F-003</div>
+    <h4>Voice annotation while drawing</h4>
+    <p class="what">Users can hold a microphone button and narrate as they draw — "this is a 1.5 meter steel cylinder, the line through it is a 50mm copper pipe." Speech is transcribed on-device and bound to the active stroke.</p>
+    <p class="why">Visual interpretation alone caps out at roughly 70-85% accuracy on free sketches. Voice adds a redundant channel — geometry plus intent plus material — that cross-validates the interpretation and lifts effective accuracy near 99%.</p>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-id">F-004</div>
+    <h4>Geometric primitive detection</h4>
+    <p class="what">On submission, an on-device pass identifies geometric primitives — rectangles, circles, ellipses, straight lines, arcs — and their spatial relationships. The result is a structured description: <em>"rectangle at top, two circles inside it, horizontal line crossing the lower third."</em></p>
+    <p class="why">Vision-language models are unreliable narrators of geometry. They name objects well and measure them poorly. By extracting the geometry deterministically first, the interpretation step only has to handle the semantic question — <em>what does this configuration mean?</em> — not the perceptual one.</p>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-id">F-005</div>
+    <h4>Semantic interpretation</h4>
+    <p class="what">A multimodal AI model receives the sketch image, the structured primitives, the domain tag, and any voice annotation. It returns a structured assembly specification: an ordered list of named parts, their dimensions, and their relationships.</p>
+    <p class="why">A free-text description is unverifiable. A structured spec — <em>"cylinder(h=1.5m, d=0.3m, material=steel) + pipe(d=0.05m, length=0.8m, material=copper, relation=horizontal_through_midpoint)"</em> — can be rendered, validated, and corrected. Structure is what makes precision possible.</p>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-id">F-006</div>
+    <h4>Validation overlay</h4>
+    <p class="what">Before generating any final image, the system renders a clean schematic interpretation of what it understood — perfect circles, straight lines, labeled parts — overlaid semi-transparent on the user's sketch. The user can tap any element to correct it.</p>
+    <p class="why">This is the single largest precision multiplier in the system. Raw AI interpretation accuracy of 80% becomes effective accuracy of 99% the moment a human confirms or corrects. It also turns errors into a teaching moment rather than a frustration.</p>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-id">F-007</div>
+    <h4>Conversational refinement</h4>
+    <p class="what">Once the interpretation is confirmed, the system asks contextual follow-up questions tailored to the object. For a cylinder-with-pipe assembly: <em>material, dimensions, context (industrial / residential / lab), render style (photoreal / blueprint / CAD).</em> Each answer is a tappable option, not a typed field.</p>
+    <p class="why">Mobile typing is friction. Tappable choices feel conversational rather than transactional. And constraining the user to curated options means every answer maps cleanly to the generation prompt — no parsing, no ambiguity.</p>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-id">F-008</div>
+    <h4>Dual-path rendering</h4>
+    <p class="what">The system offers two output modes from the same validated spec: a <strong>procedural 3D render</strong> built from exact parametric primitives, or a <strong>photorealistic AI render</strong> conditioned on the original sketch for structural fidelity. Users can flip between them.</p>
+    <p class="why">Procedural is geometrically perfect — a cylinder is exactly a cylinder, at exactly the specified dimensions. AI is aesthetically richer — surface texture, lighting, environment. Different jobs need different outputs. Offering both means the user never has to choose between accuracy and beauty.</p>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-id">F-009</div>
+    <h4>Iterative refinement loop</h4>
+    <p class="what">After the first render, users can request adjustments in natural language: <em>"make the pipe thicker," "change to brushed steel," "industrial workshop background instead."</em> The system updates the spec and re-renders without losing the original geometric lock.</p>
+    <p class="why">Real design is iterative. First-shot perfection is a fantasy. Letting users converge on the right output through small adjustments is more honest than promising magic.</p>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-id">F-010</div>
+    <h4>Project history</h4>
+    <p class="what">Every sketch, interpretation, refinement, and render is saved as a versioned project. Users can revisit, branch, or export any state at any time.</p>
+    <p class="why">A sketch app that forgets is a sketch app that loses trust. History is also the data foundation for future model fine-tuning — the corpus of <em>"what users actually meant"</em> versus <em>"what the system first guessed."</em></p>
+  </div>
+
+  <div class="feature-block">
+    <div class="feature-id">F-011</div>
+    <h4>Export &amp; share</h4>
+    <p class="what">Final outputs export as PNG (raster), SVG (vector schematic), GLB (3D model for procedural path), or a structured JSON spec for downstream tools. Sharing produces a deep link that opens the project in another user's app or browser.</p>
+    <p class="why">SketchForge is rarely the final destination. A plumber sketches a fitting, exports the schematic, sends it to a supplier. A designer drafts a chair, exports the GLB, drops it into a visualization. Easy export means the tool fits real workflows.</p>
+  </div>
+
+  <h2><span class="num">§ 04</span>Domain anchoring</h2>
+  <p>SketchForge ships with four initial domains. Each is a closed vocabulary of primitives and relations the system recognizes natively. New domains can be added without retraining the core models.</p>
+
+  <div class="domain-tabs">
+    <div class="domain-card">
+      <div class="label">DOMAIN 01</div>
+      <h5>Mechanical</h5>
+      <p class="examples">Cylinders, shafts, gears, flanges, bearings, brackets, mounting plates. <strong>Example:</strong> a hydraulic ram with cap and rod end, rendered as a polished steel component.</p>
+    </div>
+    <div class="domain-card">
+      <div class="label">DOMAIN 02</div>
+      <h5>Plumbing</h5>
+      <p class="examples">Pipes, elbows, tees, valves, tanks, junctions, reducers. <strong>Example:</strong> a vertical storage tank with inlet, outlet, and pressure relief, rendered in copper or PVC.</p>
+    </div>
+    <div class="domain-card">
+      <div class="label">DOMAIN 03</div>
+      <h5>Structural</h5>
+      <p class="examples">Beams, columns, plates, trusses, connections, footings. <strong>Example:</strong> an I-beam supported by two columns with bolted plate connections, rendered as construction-stage steel.</p>
+    </div>
+    <div class="domain-card">
+      <div class="label">DOMAIN 04</div>
+      <h5>Furniture</h5>
+      <p class="examples">Legs, panels, tops, shelves, joints, fasteners. <strong>Example:</strong> a four-leg table with stretchers and a rectangular top, rendered in oak or walnut.</p>
+    </div>
+  </div>
+
+  <h2><span class="num">§ 05</span>Target users</h2>
+  <table class="audience-table">
+    <thead>
+      <tr><th>Persona</th><th>What they sketch</th><th>What they want from us</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>The trade professional</td>
+        <td>Plumbing layouts, fitting configurations, mechanical assemblies on a job site</td>
+        <td>A clear visual to send to a client, supplier, or apprentice without opening CAD on a laptop.</td>
+      </tr>
+      <tr>
+        <td>The product designer</td>
+        <td>Furniture concepts, fixture ideas, early-stage form exploration</td>
+        <td>A fast way to externalize a mental image and iterate on it before committing to formal tools.</td>
+      </tr>
+      <tr>
+        <td>The DIY hobbyist</td>
+        <td>Home improvement projects, custom builds, shop-floor experiments</td>
+        <td>A way to plan and visualize without learning SketchUp or hiring anyone.</td>
+      </tr>
+      <tr>
+        <td>The educator / student</td>
+        <td>Engineering concepts, mechanical examples, instructional diagrams</td>
+        <td>A teaching aid that bridges hand-drawn intuition and rendered clarity.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">§ 06</span>Product principles</h2>
+  <p>Five non-negotiables that govern feature decisions.</p>
+
+  <div class="principle">
+    <div class="principle-num">PRINCIPLE 01</div>
+    <div class="principle-title">The user is the author, not the prompt.</div>
+    <p>The sketch is theirs. The interpretation is a hypothesis they confirm or correct. The system never overrides the user's intent in pursuit of a "better" image.</p>
+  </div>
+
+  <div class="principle">
+    <div class="principle-num">PRINCIPLE 02</div>
+    <div class="principle-title">Precision over impression.</div>
+    <p>A geometrically correct render of a slightly wrong interpretation is worse than an honest schematic. We surface our confidence and let users correct us early.</p>
+  </div>
+
+  <div class="principle">
+    <div class="principle-num">PRINCIPLE 03</div>
+    <div class="principle-title">Conversation over command.</div>
+    <p>No long forms, no jargon-heavy menus. Tap, draw, speak, confirm. Every interaction is one of these four.</p>
+  </div>
+
+  <div class="principle">
+    <div class="principle-num">PRINCIPLE 04</div>
+    <div class="principle-title">Mobile is the home, not the port.</div>
+    <p>The product is designed for thumbs and styluses on a phone. Desktop, when it exists, is the secondary surface — not the other way around.</p>
+  </div>
+
+  <div class="principle">
+    <div class="principle-num">PRINCIPLE 05</div>
+    <div class="principle-title">Honest about what AI can do.</div>
+    <p>We do not promise 99.9% accuracy from raw sketches because the field cannot deliver it. We promise 99% effective accuracy through human-in-the-loop confirmation, and we say so.</p>
+  </div>
+
+  <div class="precision-box">
+    <h3>On the question of "99.9% precision"</h3>
+    <p>End-to-end sketch interpretation by vision-language models currently caps at roughly <span class="accent">70-85% accuracy</span> on free-form drawings — confirmed by published benchmarks across MeasureBench, Sketch2Code, and SketchJudge. SketchForge does not pretend otherwise.</p>
+    <p>What we deliver is <span class="accent">effective precision near 99%</span> through a three-part strategy: a closed vocabulary that constrains the problem, a validation overlay that catches errors before they cost the user time, and a procedural rendering path that produces geometrically exact output once the spec is confirmed.</p>
+    <p>The 99.9% number is achievable in one place: <span class="accent">the procedural render itself</span>, which is mathematically deterministic. Everywhere else, we are honest about the tradeoff.</p>
+  </div>
+
+  <h2><span class="num">§ 07</span>What we are not building (yet)</h2>
+  <ul class="crafted">
+    <li><strong>Free-form artistic sketching.</strong> SketchForge is for objects, not illustrations. Portraits, landscapes, and creative drawings are out of scope.</li>
+    <li><strong>Full CAD export.</strong> v1 exports a structured spec and a GLB. Full STEP / IGES export with constraints comes later, if at all.</li>
+    <li><strong>Multi-user collaboration.</strong> Sharing is one-way. Real-time co-editing is v3 territory.</li>
+    <li><strong>AR placement.</strong> Dropping the rendered object into a camera view of the user's room is on the roadmap, not in v1.</li>
+    <li><strong>Custom domain creation.</strong> Users get our four domains. The ability to define their own primitive vocabulary is enterprise / pro tier later.</li>
+  </ul>
+
+  <h2><span class="num">§ 08</span>Release horizon</h2>
+  <div class="roadmap">
+    <div class="roadmap-stage">
+      <div class="phase">PHASE 01</div>
+      <h5>MVP</h5>
+      <p>Single domain (mechanical). Canvas, primitive detection, AI interpretation, validation overlay, AI render only. ~6 weeks.</p>
+    </div>
+    <div class="roadmap-stage">
+      <div class="phase">PHASE 02</div>
+      <h5>v1.0</h5>
+      <p>All four domains, voice annotation, procedural render path, iterative refinement, project history, export. ~3 months from MVP.</p>
+    </div>
+    <div class="roadmap-stage">
+      <div class="phase">PHASE 03</div>
+      <h5>v1.5</h5>
+      <p>Web companion, deep-link sharing, GLB export. Pro tier with higher generation quotas and faster generation models. ~6 months from MVP.</p>
+    </div>
+    <div class="roadmap-stage">
+      <div class="phase">PHASE 04</div>
+      <h5>v2.0</h5>
+      <p>AR placement, multi-user view-only sharing, custom domain primitives for enterprise. ~12 months from MVP.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>SketchForge · Document 01 of 03</div>
+    <div>Product Feature Overview</div>
+    <div>Confidential · Draft</div>
+  </div>
+
+</div>
+</body>
+</html>

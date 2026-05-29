@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SketchForge — Technical Architecture &amp; Infrastructure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #fdfcf7;
+    --paper-warm: #f5f0e1;
+    --accent: #b8860b;
+    --rule: #d4cdb8;
+    --muted: #6b6555;
+    --green: #4a7c4e;
+    --red: #a04040;
+    --blue: #3d5a80;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Fraunces', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    font-size: 16px;
+  }
+  .page {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 60px 32px 120px;
+  }
+  .doc-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .doc-tag::before, .doc-tag::after {
+    content: '';
+    height: 1px;
+    background: var(--accent);
+    flex: 0 0 40px;
+  }
+  .doc-tag::after { flex: 1; }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(40px, 7vw, 68px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin-bottom: 24px;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .lede {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--muted);
+    max-width: 700px;
+    margin-bottom: 48px;
+    font-style: italic;
+  }
+  .meta-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 40px;
+    padding: 20px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 56px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+  .meta-bar div span {
+    display: block;
+    color: var(--ink);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 32px;
+    letter-spacing: -0.015em;
+    margin-top: 72px;
+    margin-bottom: 20px;
+  }
+  h2 .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 22px;
+    margin-top: 40px;
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+  h4 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 18px;
+    margin-top: 24px;
+    margin-bottom: 10px;
+  }
+  p { margin-bottom: 16px; max-width: 760px; }
+  strong { font-weight: 600; }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: var(--paper-warm);
+    padding: 2px 6px;
+    color: var(--ink);
+  }
+
+  /* Architecture diagram */
+  .architecture {
+    margin: 32px 0;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 32px;
+    overflow-x: auto;
+  }
+  .architecture pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    white-space: pre;
+    color: var(--paper);
+  }
+  .architecture .label { color: var(--accent); font-weight: 600; }
+  .architecture .box-edge { color: rgba(253,252,247,0.4); }
+  .architecture .comment { color: rgba(253,252,247,0.6); font-style: italic; }
+
+  /* Layer stack */
+  .layer-stack {
+    display: flex;
+    flex-direction: column;
+    margin: 32px 0;
+    border: 1px solid var(--rule);
+  }
+  .layer {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .layer:last-child { border-bottom: none; }
+  .layer:nth-child(odd) { background: var(--paper); }
+  .layer:nth-child(even) { background: var(--paper-warm); }
+  .layer-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+  }
+  .layer-tag .num {
+    display: block;
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    color: var(--ink);
+    font-weight: 300;
+    margin-bottom: 4px;
+  }
+  .layer-body h4 {
+    margin: 0 0 6px;
+    font-style: italic;
+  }
+  .layer-body .stack {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .layer-body .desc { font-size: 14px; margin: 0; }
+
+  /* Tech choice block */
+  .choice-block {
+    margin: 24px 0;
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    background: var(--paper-warm);
+  }
+  .choice-block .choice-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 6px;
+  }
+  .choice-block h4 {
+    margin: 0 0 8px;
+    font-style: italic;
+    font-size: 17px;
+  }
+  .choice-block p {
+    font-size: 14px;
+    margin: 0 0 8px;
+  }
+  .choice-block .alt {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    padding-top: 8px;
+    border-top: 1px dashed var(--rule);
+    margin-top: 8px;
+  }
+
+  /* Cost table */
+  .cost-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13px;
+  }
+  .cost-table th {
+    text-align: left;
+    padding: 12px 14px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    font-weight: 500;
+  }
+  .cost-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  .cost-table td.num {
+    font-family: 'JetBrains Mono', monospace;
+    text-align: right;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .cost-table tr:last-child td {
+    border-bottom: none;
+    border-top: 2px solid var(--ink);
+    font-weight: 600;
+  }
+
+  /* Risk callouts */
+  .risk {
+    margin: 20px 0;
+    padding: 18px 22px;
+    border-left: 3px solid var(--red);
+    background: rgba(160,64,64,0.04);
+  }
+  .risk .risk-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 0.2em;
+    margin-bottom: 6px;
+  }
+  .risk h4 {
+    margin: 0 0 8px;
+    font-size: 16px;
+  }
+  .risk p { font-size: 13px; margin: 0 0 6px; }
+  .risk .mitigation {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--muted);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dotted var(--rule);
+  }
+  .risk .mitigation strong { color: var(--ink); font-style: normal; }
+
+  /* Data flow */
+  .dataflow-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13px;
+  }
+  .dataflow-table th {
+    text-align: left;
+    padding: 10px 12px;
+    background: var(--paper-warm);
+    border-bottom: 1px solid var(--rule);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--ink);
+  }
+  .dataflow-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  .dataflow-table td.mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  /* Code-ish block */
+  .spec-block {
+    margin: 24px 0;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 24px 28px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .spec-block .comment { color: var(--accent); }
+  .spec-block .key { color: rgba(253,252,247,0.95); }
+  .spec-block .val { color: rgba(253,252,247,0.7); }
+
+  ul.crafted {
+    list-style: none;
+    padding-left: 0;
+    margin: 16px 0;
+  }
+  ul.crafted li {
+    padding: 10px 0 10px 28px;
+    position: relative;
+    font-size: 14px;
+    border-bottom: 1px dotted var(--rule);
+  }
+  ul.crafted li:last-child { border-bottom: none; }
+  ul.crafted li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .footer {
+    margin-top: 100px;
+    padding-top: 32px;
+    border-top: 2px solid var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media print {
+    body { font-size: 11pt; }
+    .layer, .choice-block, .risk { page-break-inside: avoid; }
+  }
+  @media (max-width: 640px) {
+    .page { padding: 40px 18px 80px; }
+    h1 { font-size: 38px; }
+    h2 { font-size: 26px; }
+    .layer { grid-template-columns: 1fr; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="doc-tag">Document 03 · Technical Architecture &amp; Infrastructure</div>
+  <h1>The engine<br/><em>under the canvas.</em></h1>
+  <p class="lede">A complete technical map of SketchForge — every layer of the system, every external dependency, every cost driver, every risk. Built to be opinionated where it matters and explicit about tradeoffs everywhere else.</p>
+
+  <div class="meta-bar">
+    <div>Audience<span>Engineering · CTO · Investors (technical)</span></div>
+    <div>Stack<span>Flutter · Node.js · TypeScript · Cloud AI</span></div>
+    <div>Maturity<span>Pre-build · Architectural draft</span></div>
+    <div>Pairs with<span>Doc 01 (Product) · Doc 02 (Flows)</span></div>
+  </div>
+
+  <h2><span class="num">§ 01</span>System architecture at a glance</h2>
+  <p>SketchForge is a mobile-first, cloud-augmented application. The phone handles capture and lightweight processing; the cloud handles semantic interpretation, generation, and persistence. The two halves communicate over a thin, well-defined API.</p>
+
+  <div class="architecture"><pre>
+  <span class="comment">┌─────────────────────────────────────────────────────────────────────┐</span>
+  <span class="comment">│                          MOBILE CLIENT                              │</span>
+  <span class="comment">│                       (Flutter · iOS + Android)                     │</span>
+  <span class="comment">├─────────────────────────────────────────────────────────────────────┤</span>
+  <span class="comment">│</span>                                                                     <span class="comment">│</span>
+  <span class="comment">│</span>   <span class="label">[Canvas Layer]</span>          <span class="label">[State Layer]</span>         <span class="label">[Render Layer]</span>     <span class="comment">│</span>
+  <span class="comment">│</span>   CustomPainter         Riverpod / BLoC        Three.js view       <span class="comment">│</span>
+  <span class="comment">│</span>   Stroke recorder       Spec store             3D model viewer     <span class="comment">│</span>
+  <span class="comment">│</span>   Voice capture         History timeline       Image viewer        <span class="comment">│</span>
+  <span class="comment">│</span>                                                                     <span class="comment">│</span>
+  <span class="comment">│</span>   <span class="label">[On-Device AI]</span>         <span class="label">[Local Storage]</span>       <span class="label">[Network Layer]</span>    <span class="comment">│</span>
+  <span class="comment">│</span>   OpenCV primitives     SQLite (drift)         Dio / HTTP client   <span class="comment">│</span>
+  <span class="comment">│</span>   Speech-to-text        Hive (cache)           WebSocket           <span class="comment">│</span>
+  <span class="comment">│</span>                                                                     <span class="comment">│</span>
+  <span class="comment">└──────────────────────────────────┬──────────────────────────────────┘</span>
+                                     <span class="comment">│</span>
+                                     <span class="comment">│  HTTPS + WSS</span>
+                                     <span class="comment">▼</span>
+  <span class="comment">┌─────────────────────────────────────────────────────────────────────┐</span>
+  <span class="comment">│                       API GATEWAY (Edge)                            │</span>
+  <span class="comment">│                Cloudflare Workers / Vercel Edge                     │</span>
+  <span class="comment">│             Rate limit · Auth · Routing · Geo-pinning               │</span>
+  <span class="comment">└──────────────────────────────────┬──────────────────────────────────┘</span>
+                                     <span class="comment">▼</span>
+  <span class="comment">┌─────────────────────────────────────────────────────────────────────┐</span>
+  <span class="comment">│                       BACKEND SERVICE                               │</span>
+  <span class="comment">│                  Node.js + TypeScript (Fastify)                     │</span>
+  <span class="comment">├─────────────────────────────────────────────────────────────────────┤</span>
+  <span class="comment">│</span>                                                                     <span class="comment">│</span>
+  <span class="comment">│</span>   <span class="label">[Interpretation Service]</span>     <span class="label">[Generation Orchestrator]</span>          <span class="comment">│</span>
+  <span class="comment">│</span>   Claude vision call           Job queue (BullMQ + Redis)          <span class="comment">│</span>
+  <span class="comment">│</span>   Tool-call validation         ControlNet pipeline manager         <span class="comment">│</span>
+  <span class="comment">│</span>   Vocabulary enforcement       Procedural render trigger           <span class="comment">│</span>
+  <span class="comment">│</span>                                                                     <span class="comment">│</span>
+  <span class="comment">│</span>   <span class="label">[Project Service]</span>            <span class="label">[Auth &amp; Billing]</span>                   <span class="comment">│</span>
+  <span class="comment">│</span>   CRUD on projects             Clerk / Auth0                       <span class="comment">│</span>
+  <span class="comment">│</span>   Versioning                   Stripe (Pro tier)                   <span class="comment">│</span>
+  <span class="comment">│</span>   Export rendering             Quota tracking                      <span class="comment">│</span>
+  <span class="comment">│</span>                                                                     <span class="comment">│</span>
+  <span class="comment">└───────────┬─────────────────────────────┬───────────────────────────┘</span>
+              <span class="comment">▼</span>                             <span class="comment">▼</span>
+  <span class="comment">┌──────────────────────┐    ┌─────────────────────────────────────────┐</span>
+  <span class="comment">│  DATA LAYER          │    │  EXTERNAL AI SERVICES                   │</span>
+  <span class="comment">├──────────────────────┤    ├─────────────────────────────────────────┤</span>
+  <span class="comment">│</span>  Postgres (Supabase) <span class="comment">│    │</span>  Anthropic API (Claude vision)         <span class="comment">│</span>
+  <span class="comment">│</span>  Redis (jobs+cache)  <span class="comment">│    │</span>  Replicate / Fal (FLUX + ControlNet)   <span class="comment">│</span>
+  <span class="comment">│</span>  R2 / S3 (sketches)  <span class="comment">│    │</span>  (procedural runs on backend Node)     <span class="comment">│</span>
+  <span class="comment">└──────────────────────┘    └─────────────────────────────────────────┘</span>
+  </pre></div>
+
+  <h2><span class="num">§ 02</span>The eight technical layers</h2>
+  <p>Each layer has a single responsibility, a defined tech choice, and a defined alternative if the primary doesn't work out.</p>
+
+  <div class="layer-stack">
+    <div class="layer">
+      <div class="layer-tag">LAYER<span class="num">01</span>CAPTURE</div>
+      <div class="layer-body">
+        <h4>Sketch &amp; voice capture</h4>
+        <div class="stack">Flutter · CustomPainter · GestureDetector · speech_to_text</div>
+        <p class="desc">A custom canvas widget records strokes as <code>List&lt;Stroke&gt;</code> where each stroke is <code>{points: List&lt;Offset&gt;, timestamps: List&lt;int&gt;, pressure: List&lt;double&gt;}</code>. Voice runs in parallel via the platform's native speech APIs (no audio leaves the device). The canvas exports both the structured strokes and a rasterized PNG.</p>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-tag">LAYER<span class="num">02</span>ON-DEVICE AI</div>
+      <div class="layer-body">
+        <h4>Geometric primitive detection</h4>
+        <div class="stack">opencv_dart · Dart FFI · ~3MB native binary per platform</div>
+        <p class="desc">A bundled OpenCV instance runs <code>findContours()</code> + <code>approxPolyDP()</code> for rectangles, triangles, and polygons, and Hough Circle Transform for circles. Shape Context distance is used for matching when primitives are ambiguous. Processing time on a mid-range phone is ~150ms for a typical sketch.</p>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-tag">LAYER<span class="num">03</span>STATE</div>
+      <div class="layer-body">
+        <h4>Local state &amp; session machine</h4>
+        <div class="stack">Riverpod 2.x · Freezed for sealed unions · drift (SQLite ORM)</div>
+        <p class="desc">A finite state machine governs the session (IDLE → CANVAS_ACTIVE → DETECTING → INTERPRETING → AWAITING_CONFIRMATION → REFINING → GENERATING → RESULT). The active AssemblySpec is the source of truth; all UI reflects it reactively. Projects persist to SQLite for offline access and history.</p>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-tag">LAYER<span class="num">04</span>NETWORK</div>
+      <div class="layer-body">
+        <h4>Client–server communication</h4>
+        <div class="stack">Dio (HTTP) · web_socket_channel (WSS) · MessagePack for binary payloads</div>
+        <p class="desc">Sketch PNGs upload via multipart HTTPS. Interpretation results and generation progress stream over WebSocket so the user sees the spec appear progressively. Auth tokens via Bearer header (Clerk JWT). MessagePack used for sketch+stroke payloads to keep size 30-40% below JSON.</p>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-tag">LAYER<span class="num">05</span>GATEWAY</div>
+      <div class="layer-body">
+        <h4>Edge API gateway</h4>
+        <div class="stack">Cloudflare Workers · Hono router · rate limiting + DDoS protection</div>
+        <p class="desc">All client traffic terminates at the edge. Workers validate auth, enforce per-user rate limits, route to the appropriate backend region, and cache idempotent reads (e.g., domain vocabulary fetches). This layer absorbs malformed requests before they reach the expensive backend.</p>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-tag">LAYER<span class="num">06</span>BACKEND</div>
+      <div class="layer-body">
+        <h4>API service</h4>
+        <div class="stack">Node.js 22 · TypeScript · Fastify · zod for validation · Prisma ORM</div>
+        <p class="desc">Stateless HTTP service handling four main endpoints: <code>/interpret</code> (sketch → spec), <code>/generate</code> (spec → render job), <code>/projects</code> (CRUD), <code>/export</code> (asset formatting). Horizontally scaled behind the gateway. Deployed to Fly.io or Railway for region-pinned, low-latency response.</p>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-tag">LAYER<span class="num">07</span>DATA</div>
+      <div class="layer-body">
+        <h4>Persistence &amp; queue</h4>
+        <div class="stack">Postgres (Supabase or Neon) · Redis (Upstash) · Cloudflare R2 for objects</div>
+        <p class="desc">Postgres stores users, projects, assembly specs, and version history. Redis handles BullMQ job queues for generation work and short-term caches. R2 holds sketch PNGs, rendered outputs, and exported assets. R2 is chosen over S3 for zero egress fees, which matters when users share renders.</p>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-tag">LAYER<span class="num">08</span>EXTERNAL AI</div>
+      <div class="layer-body">
+        <h4>Vision &amp; generation</h4>
+        <div class="stack">Anthropic Claude API · Replicate (FLUX + ControlNet) · OpenAI Whisper fallback</div>
+        <p class="desc">Claude Sonnet handles sketch interpretation with forced tool-call output against the closed vocabulary. Replicate runs the ControlNet generation jobs with sketch conditioning at scale 1.3 for tight geometric lock. The procedural render path runs on the backend itself using a headless Three.js + Puppeteer setup — no external service required.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="num">§ 03</span>Key technical choices, with rationale</h2>
+
+  <div class="choice-block">
+    <div class="choice-label">CHOICE 01 · CLIENT FRAMEWORK</div>
+    <h4>Flutter over React Native</h4>
+    <p>Flutter's CustomPainter gives finer control over the canvas with predictable 60fps rendering on both platforms. The Skia backend (which Flutter uses natively) is the same engine that powers most professional drawing apps. Existing team familiarity from prior projects is a major accelerator.</p>
+    <p class="alt"><strong>If this doesn't hold:</strong> fall back to React Native with react-native-skia, which gives identical canvas semantics at the cost of a slightly more fragmented build pipeline.</p>
+  </div>
+
+  <div class="choice-block">
+    <div class="choice-label">CHOICE 02 · INTERPRETATION MODEL</div>
+    <h4>Claude Sonnet 4.5 over GPT-4o or Gemini</h4>
+    <p>Claude has the strongest structured tool-use behavior of the three frontier multimodal models in 2026, which is the single most important attribute for this use case — we need it to emit valid <code>AssemblyPart</code> and <code>AssemblyRelation</code> tool calls reliably, not free text. GPT-4o is the strongest fallback; Gemini is third-line.</p>
+    <p class="alt"><strong>If this doesn't hold:</strong> dual-model voting — call both Claude and GPT-4o on the same sketch, accept only matching interpretations, defer to user when they disagree.</p>
+  </div>
+
+  <div class="choice-block">
+    <div class="choice-label">CHOICE 03 · GENERATION MODEL</div>
+    <h4>SDXL ControlNet via Replicate (with FLUX as Pro upgrade)</h4>
+    <p>SDXL ControlNet has wider model availability, faster inference (~3-5s on a high-end GPU), and better performance-per-dollar than FLUX in 2026. For the MVP it's the default. FLUX delivers higher quality but at ~3x the time and cost, so it's reserved for Pro-tier users who pay for the upgrade.</p>
+    <p class="alt"><strong>If this doesn't hold:</strong> self-host SDXL on a GPU pool (Runpod or Modal) once volume justifies it — break-even is roughly 50,000 renders per month.</p>
+  </div>
+
+  <div class="choice-block">
+    <div class="choice-label">CHOICE 04 · PROCEDURAL RENDER</div>
+    <h4>Server-side Three.js with headless Chromium</h4>
+    <p>The procedural rendering path runs on the backend using Three.js + Puppeteer in a worker pool. This gives geometrically exact, deterministic output with sub-second turnaround. The same Three.js scene definition can be exported as GLB for client-side viewing and AR placement later.</p>
+    <p class="alt"><strong>If this doesn't hold:</strong> move the procedural render to the client (Flutter Three.js bindings exist via flutter_3d_controller) and skip the server round-trip entirely — at the cost of larger client bundles.</p>
+  </div>
+
+  <div class="choice-block">
+    <div class="choice-label">CHOICE 05 · BACKEND HOSTING</div>
+    <h4>Fly.io for the API, Cloudflare for the edge</h4>
+    <p>Fly.io provides multi-region deployment with WireGuard mesh between regions, which keeps p95 latency under 200ms for users on three continents from a small instance footprint. Cloudflare Workers at the edge absorb auth, rate limiting, and bot traffic before Fly machines spin up.</p>
+    <p class="alt"><strong>If this doesn't hold:</strong> Railway or Render for simpler single-region deployment; switch when traffic justifies multi-region.</p>
+  </div>
+
+  <h2><span class="num">§ 04</span>Data model — the contract between layers</h2>
+  <p>Three core types govern everything. They are versioned, persisted, and exchanged across every boundary in the system.</p>
+
+  <div class="spec-block">
+<span class="comment">// The structured output of Stage 02 (primitive detection)</span>
+<span class="key">Primitive</span> {
+  <span class="key">id</span>: <span class="val">string</span>
+  <span class="key">type</span>: <span class="val">"rectangle" | "circle" | "ellipse" | "line" | "arc" | "polygon"</span>
+  <span class="key">bbox</span>: <span class="val">[x, y, w, h]</span>
+  <span class="key">params</span>: <span class="val">{ ... type-specific ... }</span>
+  <span class="key">stroke_ids</span>: <span class="val">number[]</span>  <span class="comment">// which strokes formed it</span>
+  <span class="key">confidence</span>: <span class="val">float</span>
+}
+
+<span class="comment">// The structured output of Stage 03 (AI interpretation)</span>
+<span class="key">AssemblySpec</span> {
+  <span class="key">id</span>: <span class="val">uuid</span>
+  <span class="key">version</span>: <span class="val">int</span>
+  <span class="key">domain</span>: <span class="val">"mechanical" | "plumbing" | "structural" | "furniture"</span>
+  <span class="key">parts</span>: <span class="val">AssemblyPart[]</span>
+  <span class="key">relations</span>: <span class="val">AssemblyRelation[]</span>
+  <span class="key">confidence</span>: <span class="val">float</span>
+  <span class="key">ambiguities</span>: <span class="val">string[]</span>
+  <span class="key">source</span>: <span class="val">{ sketch_id, primitive_ids, transcript? }</span>
+}
+
+<span class="key">AssemblyPart</span> {
+  <span class="key">id</span>: <span class="val">string</span>
+  <span class="key">type</span>: <span class="val">string</span>           <span class="comment">// from domain vocabulary</span>
+  <span class="key">position</span>: <span class="val">[x, y, z]</span>
+  <span class="key">dimensions</span>: <span class="val">{ ... type-specific ... }</span>
+  <span class="key">orientation</span>: <span class="val">quaternion</span>
+  <span class="key">material</span>?: <span class="val">string</span>      <span class="comment">// filled at Stage 05</span>
+}
+
+<span class="key">AssemblyRelation</span> {
+  <span class="key">from</span>: <span class="val">part_id</span>
+  <span class="key">to</span>: <span class="val">part_id</span>
+  <span class="key">type</span>: <span class="val">"inserted_into" | "joined_to" | "stacked_on" | "perpendicular_to" | ...</span>
+  <span class="key">params</span>: <span class="val">{ ... }</span>
+}
+
+<span class="comment">// The fully enriched spec going into Stage 06 (rendering)</span>
+<span class="key">EnrichedSpec</span> extends AssemblySpec {
+  <span class="key">style</span>: <span class="val">"photoreal" | "blueprint" | "cad" | "clay"</span>
+  <span class="key">context</span>: <span class="val">"industrial" | "residential" | "lab" | "outdoor"</span>
+  <span class="key">render_prompt</span>: <span class="val">string</span>      <span class="comment">// assembled for AI path</span>
+  <span class="key">control_image_url</span>: <span class="val">string</span> <span class="comment">// original sketch for ControlNet</span>
+}
+  </div>
+
+  <h2><span class="num">§ 05</span>Data flow — what moves where</h2>
+
+  <table class="dataflow-table">
+    <thead>
+      <tr>
+        <th>From</th><th>To</th><th>Payload</th><th>Size</th><th>Frequency</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Canvas widget</td><td>Local state store</td>
+        <td class="mono">Stroke deltas</td>
+        <td>~1KB / stroke</td>
+        <td>Continuous</td>
+      </tr>
+      <tr>
+        <td>Local state</td><td>SQLite</td>
+        <td class="mono">Project snapshot</td>
+        <td>~50KB / project</td>
+        <td>On save</td>
+      </tr>
+      <tr>
+        <td>Client</td><td>API gateway</td>
+        <td class="mono">PNG + primitives + transcript</td>
+        <td>~200-800KB</td>
+        <td>Per interpret call</td>
+      </tr>
+      <tr>
+        <td>Backend</td><td>Claude API</td>
+        <td class="mono">Image + structured prompt</td>
+        <td>~500KB-1MB</td>
+        <td>Per interpret call</td>
+      </tr>
+      <tr>
+        <td>Backend</td><td>Replicate</td>
+        <td class="mono">Sketch + prompt + ControlNet config</td>
+        <td>~500KB</td>
+        <td>Per generate call</td>
+      </tr>
+      <tr>
+        <td>Replicate</td><td>R2 (via backend)</td>
+        <td class="mono">Generated PNG (1024x1024)</td>
+        <td>~1-3MB</td>
+        <td>Per completed job</td>
+      </tr>
+      <tr>
+        <td>R2</td><td>Client</td>
+        <td class="mono">Signed URL → render asset</td>
+        <td>~1-3MB</td>
+        <td>Per view</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">§ 06</span>Infrastructure implications</h2>
+  <p>The above architecture has real-world consequences for hosting, cost, scaling, and operational burden. Naming these explicitly avoids unpleasant surprises at scale.</p>
+
+  <h3>Hosting topology</h3>
+  <p>The system runs across three layers: <strong>edge</strong> (Cloudflare Workers, ~free for our volume), <strong>regional API</strong> (Fly.io machines in 3 regions: US-East, EU-West, AP-Southeast), and <strong>centralized data</strong> (Postgres in one region with read replicas if needed). External AI services have their own geography; we route to whichever region the user is closest to.</p>
+
+  <h3>Per-request cost breakdown</h3>
+  <p>A single end-to-end session (sketch → interpretation → photoreal render → export) breaks down approximately as follows in 2026 pricing:</p>
+
+  <table class="cost-table">
+    <thead>
+      <tr><th>Component</th><th>Per-request cost</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Edge gateway (Cloudflare Workers)</td>
+        <td class="num">$0.0001</td>
+        <td>Effectively free at this scale</td>
+      </tr>
+      <tr>
+        <td>Backend compute (Fly.io)</td>
+        <td class="num">$0.0008</td>
+        <td>Amortized across active machines</td>
+      </tr>
+      <tr>
+        <td>Claude vision call (interpretation)</td>
+        <td class="num">$0.015</td>
+        <td>~1500 input + 500 output tokens with image</td>
+      </tr>
+      <tr>
+        <td>Replicate SDXL ControlNet render</td>
+        <td class="num">$0.04</td>
+        <td>~4 seconds GPU time</td>
+      </tr>
+      <tr>
+        <td>R2 storage + bandwidth</td>
+        <td class="num">$0.002</td>
+        <td>Zero egress fees vs S3</td>
+      </tr>
+      <tr>
+        <td>Postgres + Redis (amortized)</td>
+        <td class="num">$0.001</td>
+        <td>Supabase + Upstash starter tiers</td>
+      </tr>
+      <tr>
+        <td><strong>Total per session (photoreal path)</strong></td>
+        <td class="num">~$0.059</td>
+        <td>~$5.90 per 100 sessions</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>The procedural-only path (no AI render) drops the per-session cost to roughly <strong>$0.018</strong> because the expensive Replicate call is skipped. This is why we offer it as the default for the free tier — it lets us serve a generous free allowance without bleeding cash.</p>
+
+  <h3>Scaling thresholds</h3>
+  <ul class="crafted">
+    <li><strong>0 – 10,000 sessions/month:</strong> Single Fly.io machine per region, Supabase starter, Upstash free tier. Monthly bill under $200.</li>
+    <li><strong>10,000 – 100,000 sessions/month:</strong> Scale to 2-3 Fly.io machines per region, Supabase Pro, Upstash Pay-as-you-go. Add CDN caching for renders. Monthly bill $800 – $2,500.</li>
+    <li><strong>100,000 – 1M sessions/month:</strong> Move generation to a self-hosted GPU pool (Modal or Runpod), keep Replicate as overflow. Postgres read replicas. Monthly bill $8,000 – $25,000. Margin improves significantly because GPU cost is fixed at this volume.</li>
+    <li><strong>1M+ sessions/month:</strong> Multi-region GPU clusters, custom-fine-tuned interpretation model (saves ~40% on Claude calls), dedicated CDN contract. New cost structure requires re-architecture, but unit economics are dramatically better.</li>
+  </ul>
+
+  <h3>Latency budget</h3>
+  <p>To meet the &lt;60-second end-to-end target from Doc 02:</p>
+  <ul class="crafted">
+    <li>Sketch capture: user-driven, no budget — typically 20-40s of drawing.</li>
+    <li>Network upload (PNG + primitives): under 1s on 4G+, under 3s on slow connections. Aggressive payload compression matters here.</li>
+    <li>Claude vision call: 2-4s p95. Streaming the response helps perceived latency but doesn't change wall-clock.</li>
+    <li>User confirmation + refinement: user-driven, no budget — typically 5-15s.</li>
+    <li>SDXL ControlNet generation: 4-8s p95 on Replicate. Procedural path: under 1s.</li>
+    <li>Final asset delivery (R2): under 500ms with CDN caching.</li>
+  </ul>
+
+  <h3>Privacy &amp; data handling</h3>
+  <p>Voice transcripts are processed entirely on-device — audio never leaves the user's phone. Sketches and final renders are uploaded but stored with user-controlled retention (default: 90 days for free tier, indefinite for Pro). User content is not used for model training without explicit opt-in. The correction-feedback loop that improves interpretation accuracy is opt-in and the contributed data is anonymized at the source (no user ID, no metadata).</p>
+
+  <h2><span class="num">§ 07</span>Risk register</h2>
+
+  <div class="risk">
+    <div class="risk-tag">RISK 01 · TECHNICAL</div>
+    <h4>Interpretation accuracy plateaus below acceptable threshold</h4>
+    <p>If real-world interpretation accuracy is closer to 60% than 80%, user trust collapses and the correction loop becomes unbearable rather than empowering.</p>
+    <p class="mitigation"><strong>Mitigation:</strong> Invest early in the manual primitive labeling fallback (mentioned in Doc 02). Ship the procedural rendering path on day one so even when interpretation is wrong, users get a usable output. Collect correction data aggressively to fine-tune a domain-specific model in Phase 03.</p>
+  </div>
+
+  <div class="risk">
+    <div class="risk-tag">RISK 02 · COST</div>
+    <h4>Generation costs scale faster than revenue</h4>
+    <p>If users average 5+ renders per session and 80%+ use the photoreal path, per-user cost exceeds the Pro subscription price. This breaks the business model at scale.</p>
+    <p class="mitigation"><strong>Mitigation:</strong> Default to procedural for free tier (geometrically perfect, near-zero marginal cost). Cap free-tier AI renders at 3 per day. Move to self-hosted GPU pool at 50,000 renders/month — break-even drops dramatically. Add bulk-render discount for Enterprise tier.</p>
+  </div>
+
+  <div class="risk">
+    <div class="risk-tag">RISK 03 · DEPENDENCY</div>
+    <h4>Anthropic API outage or pricing change</h4>
+    <p>Sole-source dependency on Claude for interpretation creates a single point of failure. A 4-hour outage during peak hours would block 100% of new sessions.</p>
+    <p class="mitigation"><strong>Mitigation:</strong> Implement GPT-4o as a hot fallback from day one. If Claude returns 5xx or exceeds 8s, fail over to GPT-4o automatically. Cache interpretation results aggressively — repeat sketches don't re-call. Monitor pricing quarterly and build a thin abstraction layer (already in the architecture) that allows swapping providers with a one-line config change.</p>
+  </div>
+
+  <div class="risk">
+    <div class="risk-tag">RISK 04 · LATENCY</div>
+    <h4>Mobile network conditions degrade UX beyond recoverable</h4>
+    <p>Users on slow 3G or saturated 4G see 30+ seconds of upload time, and the experience feels broken rather than responsive.</p>
+    <p class="mitigation"><strong>Mitigation:</strong> Compress sketch payloads aggressively (PNG → WebP saves 30%, MessagePack for metadata saves another 30%). Show optimistic UI — start the refinement chips as soon as primitive detection finishes locally, before the cloud interpretation returns. Allow offline-first capture: sketches save locally and sync when network returns.</p>
+  </div>
+
+  <div class="risk">
+    <div class="risk-tag">RISK 05 · COMPLIANCE</div>
+    <h4>EU AI Act and similar regulations impose constraints on generative output</h4>
+    <p>2026+ regulations may require watermarking of AI-generated content, content provenance metadata, or specific disclosures to users.</p>
+    <p class="mitigation"><strong>Mitigation:</strong> Embed C2PA-compliant provenance metadata in every exported asset from day one — this is increasingly standard and adds negligible cost. Add a clear "generated with AI" indicator in exports. Maintain a content audit log per user (already part of the project history model) so we can respond to data requests.</p>
+  </div>
+
+  <h2><span class="num">§ 08</span>Build order (engineering perspective)</h2>
+  <p>The architecture above is the target state. To get there without over-investing in any single layer before validating the next, the recommended build order is:</p>
+
+  <ul class="crafted">
+    <li><strong>Week 1-2:</strong> Flutter canvas + stroke recording + SQLite persistence. No AI yet. Goal: prove the capture layer is rock-solid.</li>
+    <li><strong>Week 3:</strong> OpenCV integration via opencv_dart. Primitive detection running locally. Goal: structured output from raw sketches.</li>
+    <li><strong>Week 4-5:</strong> Backend skeleton (Fastify + Postgres + Redis), Claude vision integration with forced tool calls, vocabulary definition for mechanical domain only. Goal: end-to-end interpret call returning a valid AssemblySpec.</li>
+    <li><strong>Week 6:</strong> Validation overlay UI in the Flutter app. Correction flow. Goal: 99% effective accuracy on the mechanical domain via human-in-the-loop.</li>
+    <li><strong>Week 7:</strong> Procedural rendering path (server-side Three.js + Puppeteer). Three.js viewer in the app. Goal: geometrically exact renders shipping.</li>
+    <li><strong>Week 8:</strong> Replicate integration for AI photoreal path with ControlNet. Refinement chip UI. Goal: dual-path rendering working end-to-end. MVP complete.</li>
+    <li><strong>Week 9-12:</strong> Expand domains (plumbing, structural, furniture). Voice annotation. Iteration loop. Export formats. Pro tier billing.</li>
+  </ul>
+
+  <h2><span class="num">§ 09</span>Operational readiness checklist</h2>
+  <p>Before going to public launch, these must be in place. They are non-negotiable.</p>
+  <ul class="crafted">
+    <li>Structured logging (Pino → Axiom or Datadog) at every layer with request tracing.</li>
+    <li>Error tracking (Sentry) on both client and server, with source maps deployed.</li>
+    <li>Synthetic monitoring of the full pipeline (sketch upload → interpret → render → download) every 5 minutes.</li>
+    <li>Rate limiting at the edge (Cloudflare) and at the application layer (Fastify).</li>
+    <li>Cost alerts on every external service (Anthropic, Replicate, Supabase) — anomaly detection on daily spend.</li>
+    <li>Backup and point-in-time recovery for Postgres (Supabase handles this; verify retention).</li>
+    <li>Incident runbook covering: AI provider outage, R2 outage, Postgres failover, edge worker failure.</li>
+    <li>Privacy policy and terms of service that accurately describe data handling, including AI provider sub-processors.</li>
+    <li>App store compliance: privacy nutrition labels (iOS), data safety section (Android), AI-generated content disclosure where required.</li>
+  </ul>
+
+  <div class="footer">
+    <div>SketchForge · Document 03 of 03</div>
+    <div>Technical Architecture &amp; Infrastructure</div>
+    <div>Confidential · Draft</div>
+  </div>
+
+</div>
+</body>
+</html>

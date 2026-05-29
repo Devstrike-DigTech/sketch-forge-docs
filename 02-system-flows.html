@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SketchForge — System &amp; Feature Flows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #fdfcf7;
+    --paper-warm: #f5f0e1;
+    --accent: #b8860b;
+    --accent-deep: #8b6508;
+    --rule: #d4cdb8;
+    --muted: #6b6555;
+    --green: #4a7c4e;
+    --red: #a04040;
+    --blue: #3d5a80;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Fraunces', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    font-size: 16px;
+  }
+  .page {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 60px 32px 120px;
+  }
+  .doc-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .doc-tag::before, .doc-tag::after {
+    content: '';
+    height: 1px;
+    background: var(--accent);
+    flex: 0 0 40px;
+  }
+  .doc-tag::after { flex: 1; }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(40px, 7vw, 68px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin-bottom: 24px;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .lede {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--muted);
+    max-width: 640px;
+    margin-bottom: 48px;
+    font-style: italic;
+  }
+  .meta-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 40px;
+    padding: 20px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 56px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+  .meta-bar div span {
+    display: block;
+    color: var(--ink);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 32px;
+    letter-spacing: -0.015em;
+    margin-top: 72px;
+    margin-bottom: 20px;
+  }
+  h2 .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 22px;
+    margin-top: 40px;
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+  p { margin-bottom: 16px; max-width: 760px; }
+  strong { font-weight: 600; }
+
+  /* Master pipeline flow */
+  .pipeline {
+    margin: 32px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+  .pipeline-stage:last-child { border-bottom: none; }
+  .stage-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    padding-top: 4px;
+  }
+  .stage-num .big {
+    display: block;
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1;
+    margin-top: 4px;
+  }
+  .stage-body h4 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+  .stage-body .actor {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .stage-body .actor .who {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .stage-body p {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  .stage-io {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .io-block {
+    padding: 10px 12px;
+    background: var(--paper-warm);
+    border-left: 2px solid var(--rule);
+  }
+  .io-block .io-label {
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  .io-block .io-val {
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  /* Decision diamond visual */
+  .decision-tree {
+    margin: 24px 0;
+    padding: 24px;
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .decision-tree .question {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .decision-tree .branch {
+    padding-left: 24px;
+    position: relative;
+    margin-bottom: 6px;
+  }
+  .decision-tree .branch::before {
+    content: '├─';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+  .decision-tree .branch.last::before { content: '└─'; }
+  .decision-tree .branch .label {
+    color: var(--blue);
+    font-weight: 600;
+  }
+  .decision-tree .branch .result {
+    color: var(--muted);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+  }
+
+  /* Sub-flow box */
+  .subflow {
+    margin: 28px 0;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+  }
+  .subflow-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .subflow-header h4 {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 18px;
+    margin: 0;
+  }
+  .subflow-header .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+  }
+  .subflow-body {
+    padding: 20px 24px;
+  }
+  .subflow-body ol {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+  .subflow-body ol li {
+    counter-increment: step;
+    padding: 12px 0 12px 48px;
+    position: relative;
+    border-bottom: 1px dotted var(--rule);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .subflow-body ol li:last-child { border-bottom: none; }
+  .subflow-body ol li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 12px;
+    width: 32px;
+    height: 32px;
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .subflow-body code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--paper-warm);
+    padding: 2px 6px;
+    color: var(--ink);
+  }
+
+  /* State diagram */
+  .state-diagram {
+    margin: 32px 0;
+    padding: 32px 28px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    overflow-x: auto;
+  }
+  .state-diagram pre {
+    line-height: 1.5;
+    color: var(--paper);
+    white-space: pre;
+  }
+  .state-diagram .state-name { color: var(--accent); font-weight: 600; }
+  .state-diagram .arrow { color: rgba(253,252,247,0.5); }
+  .state-diagram .event { color: rgba(253,252,247,0.85); font-style: italic; }
+
+  /* Error path callout */
+  .error-callout {
+    margin: 24px 0;
+    padding: 20px 24px;
+    background: rgba(160,64,64,0.06);
+    border-left: 3px solid var(--red);
+  }
+  .error-callout h5 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+  .error-callout p {
+    font-size: 14px;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* Happy-path callout */
+  .happy-callout {
+    margin: 24px 0;
+    padding: 20px 24px;
+    background: rgba(74,124,78,0.06);
+    border-left: 3px solid var(--green);
+  }
+  .happy-callout h5 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+  .happy-callout p {
+    font-size: 14px;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* Walkthrough example */
+  .walkthrough {
+    margin: 32px 0;
+    border: 2px solid var(--ink);
+    background: var(--paper);
+  }
+  .walkthrough-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper-warm);
+  }
+  .walkthrough-header .scenario {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.25em;
+    margin-bottom: 6px;
+  }
+  .walkthrough-header h4 {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 22px;
+    font-weight: 400;
+  }
+  .walkthrough-body {
+    padding: 0;
+  }
+  .walkthrough-step {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .walkthrough-step:last-child { border-bottom: none; }
+  .walkthrough-step .timestamp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    padding-top: 2px;
+  }
+  .walkthrough-step .action {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .walkthrough-step .action strong { color: var(--ink); }
+  .walkthrough-step .action .system-quote {
+    display: block;
+    font-style: italic;
+    color: var(--muted);
+    margin-top: 4px;
+    padding-left: 12px;
+    border-left: 2px solid var(--accent);
+  }
+
+  .footer {
+    margin-top: 100px;
+    padding-top: 32px;
+    border-top: 2px solid var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media print {
+    body { font-size: 11pt; }
+    .pipeline-stage, .subflow, .walkthrough { page-break-inside: avoid; }
+  }
+  @media (max-width: 640px) {
+    .page { padding: 40px 18px 80px; }
+    h1 { font-size: 38px; }
+    h2 { font-size: 26px; }
+    .pipeline-stage { grid-template-columns: 1fr; gap: 8px; }
+    .stage-io { grid-template-columns: 1fr; }
+    .walkthrough-step { grid-template-columns: 1fr; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="doc-tag">Document 02 · System &amp; Feature Flows</div>
+  <h1>How it<br/><em>actually works.</em></h1>
+  <p class="lede">A stage-by-stage map of what happens between the moment a user touches the canvas and the moment they hold the final render. Includes the happy path, the error paths, and the decision points where humans correct machines.</p>
+
+  <div class="meta-bar">
+    <div>Scope<span>End-to-end user flow</span></div>
+    <div>Audience<span>PM · Engineering · Design</span></div>
+    <div>Pairs with<span>Doc 01 (Product) · Doc 03 (Architecture)</span></div>
+    <div>Status<span>Draft v1</span></div>
+  </div>
+
+  <h2><span class="num">§ 01</span>The master pipeline</h2>
+  <p>Every successful interaction passes through seven stages. Each stage has a defined actor (user, device, or cloud), a defined input, and a defined output. The contract between stages is what makes the system testable and the precision claims measurable.</p>
+
+  <div class="pipeline">
+
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE<span class="big">01</span></div>
+      <div class="stage-body">
+        <h4>Sketch capture</h4>
+        <div class="actor">ACTOR · <span class="who">USER + DEVICE</span></div>
+        <p>The user opens the app, selects a domain, and draws on the canvas. Every stroke is recorded as a sequence of points with timestamps and (where available) pressure. Voice annotation runs in parallel as an optional second channel.</p>
+        <div class="stage-io">
+          <div class="io-block">
+            <div class="io-label">INPUT</div>
+            <div class="io-val">Touch events · stylus events · microphone stream · domain selection</div>
+          </div>
+          <div class="io-block">
+            <div class="io-label">OUTPUT</div>
+            <div class="io-val">Stroke[] · audio transcript · domain tag · rasterized PNG of canvas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE<span class="big">02</span></div>
+      <div class="stage-body">
+        <h4>Primitive detection</h4>
+        <div class="actor">ACTOR · <span class="who">DEVICE</span> (on-device, no network)</div>
+        <p>OpenCV runs over the canvas image to identify geometric primitives — rectangles, circles, ellipses, lines, arcs — and their bounding boxes, centers, and proportions. This pass is deterministic and fast (~150ms on a mid-range phone).</p>
+        <div class="stage-io">
+          <div class="io-block">
+            <div class="io-label">INPUT</div>
+            <div class="io-val">Rasterized PNG · stroke order metadata</div>
+          </div>
+          <div class="io-block">
+            <div class="io-label">OUTPUT</div>
+            <div class="io-val">Primitive[] — [{type, bbox, params}] · spatial relations</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE<span class="big">03</span></div>
+      <div class="stage-body">
+        <h4>Semantic interpretation</h4>
+        <div class="actor">ACTOR · <span class="who">CLOUD AI</span> (Claude Sonnet or equivalent)</div>
+        <p>A multimodal model receives the sketch image, the primitives list, the voice transcript, and the domain tag. It returns a structured assembly specification through forced tool-call output — no free text, only validated function invocations against the closed vocabulary.</p>
+        <div class="stage-io">
+          <div class="io-block">
+            <div class="io-label">INPUT</div>
+            <div class="io-val">PNG · primitives[] · transcript · domain · vocabulary</div>
+          </div>
+          <div class="io-block">
+            <div class="io-label">OUTPUT</div>
+            <div class="io-val">AssemblySpec{parts[], relations[], confidence, ambiguities[]}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE<span class="big">04</span></div>
+      <div class="stage-body">
+        <h4>Validation overlay</h4>
+        <div class="actor">ACTOR · <span class="who">USER + DEVICE</span></div>
+        <p>The device renders a clean schematic from the AssemblySpec and overlays it semi-transparent on the user's original sketch. The user inspects, taps to correct any misidentified part, and confirms. Corrections re-enter the spec without another AI call.</p>
+        <div class="stage-io">
+          <div class="io-block">
+            <div class="io-label">INPUT</div>
+            <div class="io-val">AssemblySpec · user's original PNG · tap events</div>
+          </div>
+          <div class="io-block">
+            <div class="io-label">OUTPUT</div>
+            <div class="io-val">ConfirmedSpec — user-validated assembly description</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE<span class="big">05</span></div>
+      <div class="stage-body">
+        <h4>Refinement dialog</h4>
+        <div class="actor">ACTOR · <span class="who">USER + DEVICE</span></div>
+        <p>The system asks contextual follow-up questions tailored to the confirmed parts: material, dimensions (pre-filled from sketch proportions), context, render style. Each is a tap-to-select chip set. Voice answers are also accepted.</p>
+        <div class="stage-io">
+          <div class="io-block">
+            <div class="io-label">INPUT</div>
+            <div class="io-val">ConfirmedSpec · tap or voice selections</div>
+          </div>
+          <div class="io-block">
+            <div class="io-label">OUTPUT</div>
+            <div class="io-val">EnrichedSpec — full description ready for rendering</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE<span class="big">06</span></div>
+      <div class="stage-body">
+        <h4>Rendering</h4>
+        <div class="actor">ACTOR · <span class="who">CLOUD (AI path) or DEVICE (procedural path)</span></div>
+        <p>Two rendering paths run from the same spec. The procedural path builds a parametric 3D model deterministically. The AI path generates a photoreal image using ControlNet conditioned on the original sketch so geometry is preserved. Users see whichever they selected first; the other is available with one tap.</p>
+        <div class="stage-io">
+          <div class="io-block">
+            <div class="io-label">INPUT</div>
+            <div class="io-val">EnrichedSpec · original sketch (for AI control conditioning)</div>
+          </div>
+          <div class="io-block">
+            <div class="io-label">OUTPUT</div>
+            <div class="io-val">Render — GLB 3D model OR PNG photoreal image</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE<span class="big">07</span></div>
+      <div class="stage-body">
+        <h4>Iterate or export</h4>
+        <div class="actor">ACTOR · <span class="who">USER</span></div>
+        <p>The user accepts the render and exports, or requests adjustments in natural language ("thicker pipe," "industrial setting," "brushed metal instead"). Adjustments update the EnrichedSpec and re-trigger rendering. The geometric lock from the original sketch is preserved across iterations.</p>
+        <div class="stage-io">
+          <div class="io-block">
+            <div class="io-label">INPUT</div>
+            <div class="io-val">Render · user feedback (text or option chips)</div>
+          </div>
+          <div class="io-block">
+            <div class="io-label">OUTPUT</div>
+            <div class="io-val">Final asset (PNG / SVG / GLB / JSON) · project saved to history</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <h2><span class="num">§ 02</span>Critical decision points</h2>
+  <p>The pipeline branches at three places. Each is a moment where the system must choose what to do based on confidence or user input. These are also where most failures occur, so they deserve explicit design.</p>
+
+  <h3>Decision point A — After interpretation</h3>
+  <div class="decision-tree">
+    <div class="question">How confident is the AI interpretation?</div>
+    <div class="branch"><span class="label">confidence &gt;= 0.85</span> &nbsp;→&nbsp; <span class="result">Show overlay with confirmation prompt only</span></div>
+    <div class="branch"><span class="label">0.60 &lt;= confidence &lt; 0.85</span> &nbsp;→&nbsp; <span class="result">Show overlay AND prompt for material/dimension early</span></div>
+    <div class="branch"><span class="label">confidence &lt; 0.60</span> &nbsp;→&nbsp; <span class="result">Show ambiguity dialog: "I'm seeing either X or Y — which is it?"</span></div>
+    <div class="branch last"><span class="label">interpretation failed</span> &nbsp;→&nbsp; <span class="result">Offer manual primitive labeling fallback (user assigns part types directly)</span></div>
+  </div>
+
+  <h3>Decision point B — Render path selection</h3>
+  <div class="decision-tree">
+    <div class="question">Which rendering path runs first?</div>
+    <div class="branch"><span class="label">style = blueprint OR CAD</span> &nbsp;→&nbsp; <span class="result">Procedural path only (faster, exact)</span></div>
+    <div class="branch"><span class="label">style = photoreal OR clay</span> &nbsp;→&nbsp; <span class="result">AI path with ControlNet sketch conditioning</span></div>
+    <div class="branch"><span class="label">user has Pro tier</span> &nbsp;→&nbsp; <span class="result">Both paths run in parallel, user toggles freely</span></div>
+    <div class="branch last"><span class="label">offline / no network</span> &nbsp;→&nbsp; <span class="result">Procedural path forced, AI path queued for next online session</span></div>
+  </div>
+
+  <h3>Decision point C — After render delivery</h3>
+  <div class="decision-tree">
+    <div class="question">What does the user do next?</div>
+    <div class="branch"><span class="label">accepts as-is</span> &nbsp;→&nbsp; <span class="result">Export menu opens, project saves automatically</span></div>
+    <div class="branch"><span class="label">requests adjustment</span> &nbsp;→&nbsp; <span class="result">Spec updates, re-render with same sketch lock</span></div>
+    <div class="branch"><span class="label">rejects entirely</span> &nbsp;→&nbsp; <span class="result">Return to refinement stage, all chips re-selectable</span></div>
+    <div class="branch last"><span class="label">starts over</span> &nbsp;→&nbsp; <span class="result">Old project saved to history, fresh canvas opens</span></div>
+  </div>
+
+  <h2><span class="num">§ 03</span>Sub-flows</h2>
+  <p>Three flows that branch off the main pipeline and deserve their own attention.</p>
+
+  <div class="subflow">
+    <div class="subflow-header">
+      <h4>Voice annotation flow</h4>
+      <span class="tag">SUB-FLOW · A</span>
+    </div>
+    <div class="subflow-body">
+      <ol>
+        <li>User holds the microphone button on the canvas. Visual feedback shows a live waveform and "listening…" indicator.</li>
+        <li>Speech is transcribed locally using the device's native speech-to-text (iOS Speech framework / Android SpeechRecognizer) — no audio leaves the device.</li>
+        <li>Transcript is timestamped against the strokes being drawn at that moment. <code>{stroke_id: 3, transcript: "this is a steel cylinder, 1.5 meters tall"}</code></li>
+        <li>On submission, the bound transcripts are sent alongside the sketch to the interpretation model as explicit hints: <em>"User said about region X: ..."</em></li>
+        <li>The model uses the hints to disambiguate competing interpretations and to pre-populate material and dimension fields in the refinement stage.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="subflow">
+    <div class="subflow-header">
+      <h4>Correction flow (user fixes an interpretation error)</h4>
+      <span class="tag">SUB-FLOW · B</span>
+    </div>
+    <div class="subflow-body">
+      <ol>
+        <li>User sees the schematic overlay on stage 4 and notices a part is labeled incorrectly — "this is a flange, not a cap."</li>
+        <li>User taps the part. A bottom sheet opens listing alternative part types from the active domain's vocabulary.</li>
+        <li>User selects the correct type. The local AssemblySpec updates immediately — no new AI call required.</li>
+        <li>The schematic re-renders to reflect the correction. Geometry is preserved; only the semantic label changes.</li>
+        <li>The correction is logged anonymously (with user consent) as training signal: <em>"On sketch X, the model said cap, the user said flange."</em> This feeds future fine-tuning.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="subflow">
+    <div class="subflow-header">
+      <h4>Iteration flow (natural-language adjustment)</h4>
+      <span class="tag">SUB-FLOW · C</span>
+    </div>
+    <div class="subflow-body">
+      <ol>
+        <li>User sees the first render and types or speaks an adjustment: "make the pipe thicker and change to brushed steel."</li>
+        <li>A lightweight AI call translates the natural-language adjustment into structured edits to the EnrichedSpec — <code>{part: "pipe_1", diameter: ×1.4, material: "brushed_steel"}</code>.</li>
+        <li>The edit is shown to the user as a confirmation chip before applying: "I'll thicken the pipe and switch to brushed steel — yes?"</li>
+        <li>On confirmation, the spec updates and re-rendering is queued. The original sketch is reused as the ControlNet conditioning image so the geometric lock holds.</li>
+        <li>Previous renders remain accessible from a version slider — users can A/B between iterations without losing prior work.</li>
+      </ol>
+    </div>
+  </div>
+
+  <h2><span class="num">§ 04</span>The session state machine</h2>
+  <p>From the app's perspective, every session is a state machine. Knowing which state we're in determines what UI is visible, what the user can do, and what the system is processing in the background.</p>
+
+  <div class="state-diagram"><pre>
+  <span class="state-name">[IDLE]</span>
+       │
+       │  <span class="event">user taps "new sketch"</span>
+       ▼
+  <span class="state-name">[CANVAS_ACTIVE]</span>  <span class="arrow">────────────────┐</span>
+       │                                  │
+       │  <span class="event">user taps "interpret"</span>             │ <span class="event">undo / clear</span>
+       ▼                                  │
+  <span class="state-name">[DETECTING_PRIMITIVES]</span>  <span class="arrow">───────────┘</span>
+       │
+       │  <span class="event">primitives ready (~150ms)</span>
+       ▼
+  <span class="state-name">[INTERPRETING]</span>
+       │
+       │  <span class="event">spec returned (~2-4s)</span>
+       ▼
+  <span class="state-name">[AWAITING_CONFIRMATION]</span>  <span class="arrow">─────────┐</span>
+       │                                  │
+       │  <span class="event">user confirms</span>                    │ <span class="event">user corrects</span>
+       ▼                                  ▼
+  <span class="state-name">[REFINING]</span>                    <span class="state-name">[AWAITING_CONFIRMATION]</span>
+       │                                  (loops)
+       │  <span class="event">all chips selected</span>
+       ▼
+  <span class="state-name">[GENERATING]</span>  <span class="arrow">──────────────────┐</span>
+       │                                  │
+       │  <span class="event">render ready (~5-15s)</span>             │ <span class="event">generation error</span>
+       ▼                                  ▼
+  <span class="state-name">[RESULT]</span>                       <span class="state-name">[ERROR_RECOVERY]</span>
+       │
+       │  <span class="event">user accepts</span> ──▶ <span class="state-name">[EXPORTED]</span> ──▶ <span class="state-name">[IDLE]</span>
+       │  <span class="event">user iterates</span> ──▶ <span class="state-name">[REFINING]</span>  (with spec preserved)
+       │  <span class="event">user starts over</span> ──▶ <span class="state-name">[IDLE]</span>
+  </pre></div>
+
+  <h2><span class="num">§ 05</span>Walkthrough — a real session</h2>
+  <p>To make the abstract concrete, here is a complete session from a plumber sketching a fitting for a customer. The example traces through every stage above.</p>
+
+  <div class="walkthrough">
+    <div class="walkthrough-header">
+      <div class="scenario">SCENARIO · DOMAIN: PLUMBING</div>
+      <h4>Plumber sketching a tee fitting with a reducer for a client quote.</h4>
+    </div>
+    <div class="walkthrough-body">
+
+      <div class="walkthrough-step">
+        <div class="timestamp">T+0s</div>
+        <div class="action">Plumber opens SketchForge on her phone in the customer's basement. She taps <strong>Plumbing</strong> as the domain.</div>
+      </div>
+
+      <div class="walkthrough-step">
+        <div class="timestamp">T+5s</div>
+        <div class="action">She draws a horizontal pipe, then a vertical pipe branching upward from its center, then a small circle on the right end of the horizontal pipe to indicate a reducer. While drawing, she holds the mic and says: <em>"three-quarter inch tee, reducing to half inch on the right."</em></div>
+      </div>
+
+      <div class="walkthrough-step">
+        <div class="timestamp">T+18s</div>
+        <div class="action">She taps <strong>Interpret</strong>. The app shows a brief "Reading your sketch…" state. Primitive detection runs locally; the AI call runs in the cloud.</div>
+      </div>
+
+      <div class="walkthrough-step">
+        <div class="timestamp">T+21s</div>
+        <div class="action">A schematic overlay appears on her sketch: a clean tee fitting with a reducer. Each part is labeled. The app says:
+          <span class="system-quote">"Tee fitting with a 3/4 inch main run and a 1/2 inch reducer on the right outlet. 92% confident. Tap any part to correct."</span>
+        </div>
+      </div>
+
+      <div class="walkthrough-step">
+        <div class="timestamp">T+24s</div>
+        <div class="action">She taps the central vertical pipe — it was labeled as a branch but she meant it as the inlet. The bottom sheet opens; she taps <strong>"Inlet"</strong>. The schematic re-labels instantly.</div>
+      </div>
+
+      <div class="walkthrough-step">
+        <div class="timestamp">T+28s</div>
+        <div class="action">She taps <strong>Confirm</strong>. The refinement chips appear:
+          <span class="system-quote">Material: <strong>Copper</strong> · PVC · PEX · Brass &nbsp;|&nbsp; Context: <strong>Residential</strong> · Industrial &nbsp;|&nbsp; Style: <strong>Photoreal</strong> · Schematic · Blueprint</span>
+        </div>
+      </div>
+
+      <div class="walkthrough-step">
+        <div class="timestamp">T+32s</div>
+        <div class="action">She accepts the defaults (the voice transcript pre-selected Copper, and Residential was the default for plumbing). She taps <strong>Generate</strong>.</div>
+      </div>
+
+      <div class="walkthrough-step">
+        <div class="timestamp">T+41s</div>
+        <div class="action">A photorealistic copper tee fitting with the right-side reducer appears, geometry matching her sketch exactly. She also sees a small toggle: <strong>3D model</strong> — tapping it shows the same fitting as a rotatable procedural render with exact dimensions labeled.</div>
+      </div>
+
+      <div class="walkthrough-step">
+        <div class="timestamp">T+50s</div>
+        <div class="action">She taps <strong>Export → PNG</strong> and texts it to her customer with a price quote. Total time from opening the app to sent message: under a minute.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <h2><span class="num">§ 06</span>Failure modes and recovery</h2>
+  <p>Three things go wrong often enough to design for explicitly.</p>
+
+  <div class="error-callout">
+    <h5>FAILURE 01 · LOW INTERPRETATION CONFIDENCE</h5>
+    <p><strong>What happens:</strong> The model returns confidence below 0.6 — the sketch is ambiguous or the shapes don't match the domain vocabulary. <strong>Recovery:</strong> Show the ambiguity dialog with the top two interpretations side-by-side. If the user rejects both, offer manual primitive labeling — the user assigns part types directly and skips the AI interpretation step entirely.</p>
+  </div>
+
+  <div class="error-callout">
+    <h5>FAILURE 02 · GENERATION TIMEOUT OR ERROR</h5>
+    <p><strong>What happens:</strong> The AI generation call exceeds 30 seconds or returns an error. <strong>Recovery:</strong> Fall back to procedural rendering automatically — geometry is always exact, even if photorealism is unavailable. Surface a non-blocking toast: <em>"Showing 3D model instead. We'll try the photoreal version when you're back online."</em> Queue the AI render for retry on next session.</p>
+  </div>
+
+  <div class="error-callout">
+    <h5>FAILURE 03 · USER LOSES TRUST IN THE INTERPRETATION</h5>
+    <p><strong>What happens:</strong> After two or three corrections, the user is frustrated. <strong>Recovery:</strong> Offer the manual-build path — a panel of domain primitives that the user can drag onto a canvas and assemble directly, bypassing AI interpretation entirely. The user still gets the rendering, refinement, and export benefits. This is the escape hatch that ensures SketchForge always produces something usable, even when the AI is wrong.</p>
+  </div>
+
+  <h2><span class="num">§ 07</span>What "good" looks like</h2>
+  <p>The flows above are designed against measurable targets. These are the numbers we use to judge whether the system is working.</p>
+
+  <div class="happy-callout">
+    <h5>TARGET METRICS · MVP</h5>
+    <p><strong>Time from sketch start to first render:</strong> under 60 seconds median.<br/>
+    <strong>Interpretation accuracy on first attempt:</strong> 75% of users confirm without any corrections.<br/>
+    <strong>Effective accuracy after correction:</strong> 99% of confirmed specs render correctly.<br/>
+    <strong>Iteration completion rate:</strong> 90% of users who request an adjustment receive a satisfactory result within two iterations.<br/>
+    <strong>Session completion rate:</strong> 70% of started sketches reach the export stage.</p>
+  </div>
+
+  <div class="footer">
+    <div>SketchForge · Document 02 of 03</div>
+    <div>System &amp; Feature Flows</div>
+    <div>Confidential · Draft</div>
+  </div>
+
+</div>
+</body>
+</html>
